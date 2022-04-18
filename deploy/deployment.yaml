@@ -1,0 +1,32 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: hub-of-hubs-operator
+  labels:
+    name: hub-of-hubs-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: hub-of-hubs-operator
+  template:
+    metadata:
+      labels:
+        name: hub-of-hubs-operator
+    spec:
+      serviceAccountName: hub-of-hubs-operator
+      containers:
+      - name: hub-of-hubs-operator
+        image: hub-of-hubs-operator
+        imagePullPolicy: Always
+        env:
+        - name: HUB_OF_HUBS_OPERATOR_IMAGE
+          valueFrom:
+            configMapKeyRef:
+              name: image-config
+              key: HUB_OF_HUBS_OPERATOR_IMAGE
+        command:
+        - "/hub-of-hubs-operator"
+        - "controller"
+        - "-v=2"
+
