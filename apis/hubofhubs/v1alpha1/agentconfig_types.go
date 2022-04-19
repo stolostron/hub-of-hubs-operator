@@ -33,8 +33,7 @@ type AgentGlobalConfig struct {
 
 // AgentHeartbeatIntervalConfig defines heartbeat interval in seconds leaf hub
 type AgentHeartbeatIntervalConfig struct {
-	HoHInSeconds     uint64 `default:"60" json:"hohInSeconds,omitempty"`
-	LeafHubInSeconds uint64 `default:"60" json:"leafHubInSeconds,omitempty"`
+	LeafHub uint64 `default:"60" json:"leafHub,omitempty"`
 }
 
 // AgentComponentsConfig defines settings for leaf hub components

@@ -27,6 +27,6 @@ spec:
               key: HUB_OF_HUBS_OPERATOR_IMAGE
         command:
         - "/hub-of-hubs-operator"
-        - "controller"
+        - "manager"
         - "-v=2"
 

@@ -211,10 +211,10 @@ spec:
                     description: HeartbeatIntervalConfig defines heartbeat intervals
                       for HoH and Leaf hub in seconds
                     properties:
-                      hohInSeconds:
+                      hoh:
                         format: int64
                         type: integer
-                      leafHubInSeconds:
+                      leafHub:
                         format: int64
                         type: integer
                     type: object

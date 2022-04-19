@@ -121,10 +121,7 @@ spec:
                     description: AgentHeartbeatIntervalConfig defines heartbeat interval
                       in seconds leaf hub
                     properties:
-                      hohInSeconds:
-                        format: int64
-                        type: integer
-                      leafHubInSeconds:
+                      leafHub:
                         format: int64
                         type: integer
                     type: object

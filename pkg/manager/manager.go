@@ -12,6 +12,7 @@ import (
 	"github.com/openshift/library-go/pkg/operator/events"
 	"github.com/openshift/library-go/pkg/operator/resource/resourceapply"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	utilrand "k8s.io/apimachinery/pkg/util/rand"
@@ -25,6 +26,7 @@ import (
 	"open-cluster-management.io/addon-framework/pkg/utils"
 	"open-cluster-management.io/addon-framework/pkg/version"
 	addonapiv1alpha1 "open-cluster-management.io/api/addon/v1alpha1"
+	clusterclientset "open-cluster-management.io/api/client/cluster/clientset/versioned"
 	clusterv1 "open-cluster-management.io/api/cluster/v1"
 
 	hohoperatorclientset "github.com/stolostron/hub-of-hubs-operator/apis/client/clientset/versioned"
@@ -52,15 +54,15 @@ var agentRBACFiles = []string{
 
 func NewControllerCommand() *cobra.Command {
 	cmd := controllercmd.
-		NewControllerCommandConfig("hub-of-hubs-operator-controller", version.Get(), runController).
+		NewControllerCommandConfig("hub-of-hubs-operator-manager", version.Get(), runManager).
 		NewCommand()
-	cmd.Use = "controller"
-	cmd.Short = "Start the hub-of-hubs operator controller"
+	cmd.Use = "manager"
+	cmd.Short = "Start the hub-of-hubs-operator manager"
 
 	return cmd
 }
 
-func runController(ctx context.Context, controllerContext *controllercmd.ControllerContext) error {
+func runManager(ctx context.Context, controllerContext *controllercmd.ControllerContext) error {
 	mgr, err := addonmanager.New(controllerContext.KubeConfig)
 	if err != nil {
 		return err
@@ -74,6 +76,7 @@ func runController(ctx context.Context, controllerContext *controllercmd.Control
 		WithGetValuesFuncs(getValues, addonfactory.GetValuesFromAddonAnnotation).
 		WithAgentRegistrationOption(registrationOption).
 		WithInstallStrategy(agent.InstallAllStrategy(constants.HoHAgentNamespace)).
+		WithInstallStrategy(agent.InstallByLabelStrategy(constants.HoHAgentNamespace, metav1.LabelSelector{MatchLabels: map[string]string{"vendor": "OpenShift"}})).
 		BuildTemplateAgentAddon()
 	if err != nil {
 		klog.Errorf("failed to build agent %v", err)
@@ -87,11 +90,19 @@ func runController(ctx context.Context, controllerContext *controllercmd.Control
 
 	// build kube client
 	kubeClient, err := kubernetes.NewForConfig(controllerContext.KubeConfig)
-
+	if err != nil {
+		return err
+	}
 	// build kube informer factory
 	kubeInformerFactory := informers.NewSharedInformerFactory(kubeClient, 10*time.Minute)
 
-	// build hohoperator kubeconfig
+	// build managedcluster kubeclient
+	clusterClient, err := clusterclientset.NewForConfig(controllerContext.KubeConfig)
+	if err != nil {
+		return err
+	}
+
+	// build hohoperator kubeclient
 	hohOperatorClient, err := hohoperatorclientset.NewForConfig(controllerContext.KubeConfig)
 	if err != nil {
 		return err
@@ -100,8 +111,9 @@ func runController(ctx context.Context, controllerContext *controllercmd.Control
 	// build hohoperator informer factory
 	hohOperatorInformerFactory := hohoperatorinformer.NewSharedInformerFactory(hohOperatorClient, 10*time.Minute)
 
-	// create an hohOperatorPropagatorController controller
-	hohOperatorPropagatorController := hohoperatorpropagator.NewHoHOperatorPropagatorController(
+	// create an instance of hohOperatorPropagatorController
+	hohOperatorPropagatorController := hohoperatorpropagator.NewHohOperatorPropagatorController(
+		clusterClient,
 		hohOperatorClient,
 		hohOperatorInformerFactory.Hubofhubs().V1alpha1().Configs(),
 		controllerContext.EventRecorder,
@@ -174,8 +186,7 @@ func applyManifestFromFile(file, clusterName, addonName string, kubeclient *kube
 	return nil
 }
 
-func getValues(cluster *clusterv1.ManagedCluster,
-	addon *addonapiv1alpha1.ManagedClusterAddOn) (addonfactory.Values, error) {
+func getValues(cluster *clusterv1.ManagedCluster, addon *addonapiv1alpha1.ManagedClusterAddOn) (addonfactory.Values, error) {
 	installNamespace := addon.Spec.InstallNamespace
 	if len(installNamespace) == 0 {
 		installNamespace = constants.HoHAgentNamespace

@@ -58,38 +58,41 @@ func (o *AgentOptions) RunAgent(ctx context.Context, controllerContext *controll
 		return err
 	}
 
-	// build kube client of hub cluster
+	// build kubeclient of hub cluster
 	hubKubeClient, err := kubernetes.NewForConfig(hubRestConfig)
+	if err != nil {
+		return err
+	}
 
-	// build hub kube informer factory
+	// build kubeinformer factory of hub cluster
 	hubKubeInformerFactory := informers.NewSharedInformerFactoryWithOptions(hubKubeClient, 10*time.Minute, informers.WithNamespace(o.SpokeClusterName))
 
-	// build kubeclient of managed cluster
+	// build kubeclient of managedcluster
 	spokeKubeClient, err := kubernetes.NewForConfig(controllerContext.KubeConfig)
 	if err != nil {
 		return err
 	}
 
-	// build spoke kube informer factory
+	// build kubeinformer factory of managedcluster
 	spokeKubeInformerFactory := informers.NewSharedInformerFactory(spokeKubeClient, 10*time.Minute)
 
 	// build hohoperatorclientset of hub cluster
-	hubHoHOperatorClient, err := hohoperatorclientset.NewForConfig(hubRestConfig)
+	hohOperatorClient, err := hohoperatorclientset.NewForConfig(hubRestConfig)
 	if err != nil {
 		return err
 	}
 
 	// build hohoperator informer factory
-	hubHoHOperatorInformerFactory := hohoperatorinformer.NewSharedInformerFactory(hubHoHOperatorClient, 10*time.Minute)
+	hohOperatorInformerFactory := hohoperatorinformer.NewSharedInformerFactoryWithOptions(hohOperatorClient, 10*time.Minute, hohoperatorinformer.WithNamespace(o.SpokeClusterName))
 
 	// create an hohoperatoragentcontroller controller
-	hohOperatorAgentController := hohoperatoragentcontroller.NewHoHOperatorAgentController(
+	hohOperatorAgentController := hohoperatoragentcontroller.NewHohOperatorAgentController(
 		o.SpokeClusterName,
 		o.AddonNamespace,
 		hubKubeClient,
 		spokeKubeClient,
-		hubHoHOperatorClient,
-		hubHoHOperatorInformerFactory.Hubofhubs().V1alpha1().Configs(),
+		hohOperatorClient,
+		hohOperatorInformerFactory.Hubofhubs().V1alpha1().AgentConfigs(),
 		controllerContext.EventRecorder,
 	)
 
@@ -101,8 +104,8 @@ func (o *AgentOptions) RunAgent(ctx context.Context, controllerContext *controll
 	)
 
 	go hubKubeInformerFactory.Start(ctx.Done())
-	go hubHoHOperatorInformerFactory.Start(ctx.Done())
 	go spokeKubeInformerFactory.Start(ctx.Done())
+	go hohOperatorInformerFactory.Start(ctx.Done())
 	go hohOperatorAgentController.Run(ctx, 1)
 	go leaseUpdater.Start(ctx)
 
