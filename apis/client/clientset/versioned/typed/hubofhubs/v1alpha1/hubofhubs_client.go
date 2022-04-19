@@ -27,12 +27,17 @@ import (
 
 type HubofhubsV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	AgentConfigsGetter
 	ConfigsGetter
 }
 
 // HubofhubsV1alpha1Client is used to interact with features provided by the hubofhubs.open-cluster-management.io group.
 type HubofhubsV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *HubofhubsV1alpha1Client) AgentConfigs(namespace string) AgentConfigInterface {
+	return newAgentConfigs(c, namespace)
 }
 
 func (c *HubofhubsV1alpha1Client) Configs(namespace string) ConfigInterface {

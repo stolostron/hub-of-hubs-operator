@@ -17,6 +17,14 @@ limitations under the License.
 
 package v1alpha1
 
+// AgentConfigListerExpansion allows custom methods to be added to
+// AgentConfigLister.
+type AgentConfigListerExpansion interface{}
+
+// AgentConfigNamespaceListerExpansion allows custom methods to be added to
+// AgentConfigNamespaceLister.
+type AgentConfigNamespaceListerExpansion interface{}
+
 // ConfigListerExpansion allows custom methods to be added to
 // ConfigLister.
 type ConfigListerExpansion interface{}

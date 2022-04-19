@@ -73,13 +73,13 @@ type ConfigSpec struct {
 
 // GlobalConfig defines common settings
 type GlobalConfig struct {
-	AggregationLevel    AggregationLevel   `json:"aggregationLevel,omitempty"` // full or minimal
-	HeartbeatIntervals  HeartbeatIntervals `json:"heartbeatIntervals,omitempty"`
-	EnableLocalPolicies bool               `json:"enableLocalPolicies,omitempty"`
+	AggregationLevel    AggregationLevel         `json:"aggregationLevel,omitempty"` // full or minimal
+	HeartbeatInterval   *HeartbeatIntervalConfig `json:"heartbeatInterval,omitempty"`
+	EnableLocalPolicies bool                     `json:"enableLocalPolicies,omitempty"`
 }
 
-// HeartbeatIntervals defines heartbeat intervals for HoH and Leaf hub in seconds
-type HeartbeatIntervals struct {
+// HeartbeatIntervalConfig defines heartbeat intervals for HoH and Leaf hub in seconds
+type HeartbeatIntervalConfig struct {
 	HoHInSeconds     uint64 `default:"60" json:"hohInSeconds,omitempty"`
 	LeafHubInSeconds uint64 `default:"60" json:"leafHubInSeconds,omitempty"`
 }
