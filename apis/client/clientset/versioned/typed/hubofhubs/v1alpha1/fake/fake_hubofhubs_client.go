@@ -27,6 +27,10 @@ type FakeHubofhubsV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeHubofhubsV1alpha1) AgentConfigs(namespace string) v1alpha1.AgentConfigInterface {
+	return &FakeAgentConfigs{c, namespace}
+}
+
 func (c *FakeHubofhubsV1alpha1) Configs(namespace string) v1alpha1.ConfigInterface {
 	return &FakeConfigs{c, namespace}
 }
