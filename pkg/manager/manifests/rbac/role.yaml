@@ -1,0 +1,15 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: open-cluster-management:hub-of-hub-operator:agent
+  namespace: {{ .ClusterName }}
+rules:
+- apiGroups: ["hubofhubs.open-cluster-management.io"]
+  resources: ["configs"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
