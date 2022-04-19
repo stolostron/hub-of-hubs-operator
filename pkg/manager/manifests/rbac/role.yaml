@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .ClusterName }}
 rules:
 - apiGroups: ["hubofhubs.open-cluster-management.io"]
-  resources: ["configs"]
+  resources: ["agentconfigs"]
   verbs: ["*"]
 - apiGroups: [""]
   resources: ["configmaps"]

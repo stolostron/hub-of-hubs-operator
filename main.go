@@ -49,8 +49,8 @@ func main() {
 
 func newCommand(logsOptions *logs.Options) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "addon",
-		Short: "hub-of-hubs operator",
+		Use:   "hub-of-hubs-operator",
+		Short: "hub-of-hubs-operator",
 		Run: func(cmd *cobra.Command, args []string) {
 			if err := logsOptions.ValidateAndApply(); err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)

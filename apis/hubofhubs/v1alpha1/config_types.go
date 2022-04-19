@@ -80,8 +80,8 @@ type GlobalConfig struct {
 
 // HeartbeatIntervalConfig defines heartbeat intervals for HoH and Leaf hub in seconds
 type HeartbeatIntervalConfig struct {
-	HoHInSeconds     uint64 `default:"60" json:"hohInSeconds,omitempty"`
-	LeafHubInSeconds uint64 `default:"60" json:"leafHubInSeconds,omitempty"`
+	HoH     uint64 `default:"60" json:"hoh,omitempty"`
+	LeafHub uint64 `default:"60" json:"leafHub,omitempty"`
 }
 
 // ComponentsConfig defines settings for all components

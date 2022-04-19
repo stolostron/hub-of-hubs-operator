@@ -5,6 +5,7 @@ resources:
 - clusterrolebinding.yaml
 - deployment.yaml
 - serviceaccount.yaml
+- crd/hubofhubs.open-cluster-management.io_agentconfigs.yaml
 - crd/hubofhubs.open-cluster-management.io_configs.yaml
 
 images:

@@ -6,6 +6,9 @@ rules:
 - apiGroups: [""]
   resources: ["configmaps", "events", "secrets"]
   verbs: ["get", "list", "watch", "create", "update", "delete", "deletecollection", "patch"]
+- apiGroups: ["coordination.k8s.io"]
+  resources: ["leases"]
+  verbs: ["create", "get", "update"]
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["roles", "rolebindings"]
   verbs: ["get", "list", "watch", "create", "update", "delete"]
@@ -37,6 +40,6 @@ rules:
   resources: ["managedclusteraddons/status"]
   verbs: ["update", "patch"]
 - apiGroups: ["hubofhubs.open-cluster-management.io"]
-  resources: ["configs"]
+  resources: ["configs", "agentconfigs"]
   verbs: ["*"]
 
