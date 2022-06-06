@@ -1,0 +1,235 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: configs.hubofhubs.open-cluster-management.io
+spec:
+  group: hubofhubs.open-cluster-management.io
+  names:
+    kind: Config
+    listKind: ConfigList
+    plural: configs
+    singular: config
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Config is the Schema for the configs API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ConfigSpec defines the desired state of Config
+            properties:
+              components:
+                description: ComponentsConfig defines settings for all components
+                properties:
+                  core:
+                    description: CoreConfig defines settings for hub-of-hubs core
+                      controllers
+                    properties:
+                      hoh:
+                        description: HohConfig defines settings for core controllers
+                          in hub of hubs cluster
+                        properties:
+                          nonk8sAPI:
+                            description: Nonk8sAPIConfig defines settings for nonk8s-API
+                            properties:
+                              basePath:
+                                type: string
+                            type: object
+                          rbac:
+                            description: RBACConfig defines settings for RBAC
+                            type: object
+                          specSync:
+                            description: SpecSyncConfig defines settings for spec-sync
+                            type: object
+                          specTransportBridge:
+                            description: SpecTransportBridgeConfig defines settings
+                              for spec-transport-bridge
+                            properties:
+                              msgCompressType:
+                                description: MsgCompressType specifies the type of
+                                  message compress should do before sending the information
+                                  to transport
+                                enum:
+                                - gzip
+                                - no-op
+                                type: string
+                              msgSizeLimit:
+                                format: int64
+                                type: integer
+                              syncInterval:
+                                format: int64
+                                type: integer
+                            type: object
+                          statusSync:
+                            description: StatusSyncConfig defines settings for status-sync
+                            properties:
+                              syncInterval:
+                                format: int64
+                                type: integer
+                            type: object
+                          statusTransportBridge:
+                            description: StatusTransportBridgeConfig defines settings
+                              for status-transport-bridge
+                            properties:
+                              committerInterval:
+                                format: int64
+                                type: integer
+                              statisticsLogInterval:
+                                format: int64
+                                type: integer
+                            type: object
+                        type: object
+                      leafHub:
+                        description: LeafHubConfig defines settings for core controllers
+                          in leaf hub cluster
+                        properties:
+                          specSync:
+                            description: LeafHubSpecSyncConfig defines settings for
+                              leafhub-spec-sync
+                            properties:
+                              enforceHoHRbac:
+                                type: boolean
+                              kubeClientPoolSIze:
+                                format: int64
+                                type: integer
+                            type: object
+                          statusSync:
+                            description: LeafHubStatusSyncConfig defines settings
+                              for leafhub-status-sync
+                            properties:
+                              deltaSentCountSwitchFactor:
+                                format: int64
+                                type: integer
+                              msgCompressType:
+                                description: MsgCompressType specifies the type of
+                                  message compress should do before sending the information
+                                  to transport
+                                enum:
+                                - gzip
+                                - no-op
+                                type: string
+                              msgSizeLimit:
+                                format: int64
+                                type: integer
+                              syncIntervalConfig:
+                                description: LeafHubStatusSyncIntervalSettings defines
+                                  snyc interval settings for leahub-status-sync
+                                properties:
+                                  controlInfo:
+                                    format: int64
+                                    type: integer
+                                  managedClusters:
+                                    format: int64
+                                    type: integer
+                                  policies:
+                                    format: int64
+                                    type: integer
+                                type: object
+                            type: object
+                        type: object
+                    type: object
+                  database:
+                    description: DatabaseConfig defines settings for database
+                    properties:
+                      postgresql:
+                        description: PostgreSqlConfig defines settings for PostgreSql
+                        properties:
+                          enableHA:
+                            type: boolean
+                          version:
+                            type: string
+                        type: object
+                      provider:
+                        description: DatabaseProvider specifies the provider type
+                          of database
+                        enum:
+                        - postgresql
+                        type: string
+                    type: object
+                  transport:
+                    description: TransportConfig defines settings for transport layer
+                    properties:
+                      kafka:
+                        description: KafkaConfig defines settings for Kafka transport
+                        properties:
+                          replicas:
+                            format: int64
+                            type: integer
+                          version:
+                            type: string
+                        type: object
+                      provider:
+                        description: TransportProvider specifies the provider type
+                          of transport layer
+                        enum:
+                        - kafka
+                        - sync-service
+                        type: string
+                      syncService:
+                        description: SyncServiceConfig defines settings for Sync-service
+                          transport
+                        properties:
+                          pollingInterval:
+                            format: int64
+                            type: integer
+                          version:
+                            type: string
+                        type: object
+                    type: object
+                type: object
+              global:
+                description: GlobalConfig defines common settings
+                properties:
+                  aggregationLevel:
+                    description: AggregationLevel specifies the level of aggregation
+                      leaf hubs should do before sending the information
+                    enum:
+                    - full
+                    - minimal
+                    type: string
+                  enableLocalPolicies:
+                    type: boolean
+                  heartbeatInterval:
+                    description: HeartbeatIntervalConfig defines heartbeat intervals
+                      for HoH and Leaf hub in seconds
+                    properties:
+                      hoh:
+                        format: int64
+                        type: integer
+                      leafHub:
+                        format: int64
+                        type: integer
+                    type: object
+                type: object
+            type: object
+          status:
+            description: ConfigStatus defines the observed state of Config
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
