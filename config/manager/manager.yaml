@@ -2,37 +2,37 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: controller-manager
+    name: hub-of-hubs-operator
   name: system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
+  name: hub-of-hubs-operator
   namespace: system
   labels:
-    control-plane: controller-manager
+    name: hub-of-hubs-operator
 spec:
   selector:
     matchLabels:
-      control-plane: controller-manager
+      name: hub-of-hubs-operator
   replicas: 1
   template:
     metadata:
       annotations:
-        kubectl.kubernetes.io/default-container: manager
+        kubectl.kubernetes.io/default-container: hub-of-hubs-operator
       labels:
-        control-plane: controller-manager
+        name: hub-of-hubs-operator
     spec:
       securityContext:
         runAsNonRoot: true
       containers:
       - command:
-        - /manager
+        - /hub-of-hubs-operator
         args:
         - --leader-elect
         image: controller:latest
-        name: manager
+        name: hub-of-hubs-operator
         securityContext:
           allowPrivilegeEscalation: false
         livenessProbe:
@@ -56,5 +56,5 @@ spec:
           requests:
             cpu: 10m
             memory: 64Mi
-      serviceAccountName: controller-manager
+      serviceAccountName: hub-of-hubs-operator
       terminationGracePeriodSeconds: 10

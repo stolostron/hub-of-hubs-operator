@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	hubofhubsv1alpha1 "github.com/stolostron/hub-of-hubs-operator/apis/hubofhubs/v1alpha1"
-	hubofhubscontrollers "github.com/stolostron/hub-of-hubs-operator/controllers/hubofhubs"
+	hubofhubscontrollers "github.com/stolostron/hub-of-hubs-operator/pkg/controllers/hubofhubs"
 	//+kubebuilder:scaffold:imports
 )
 
