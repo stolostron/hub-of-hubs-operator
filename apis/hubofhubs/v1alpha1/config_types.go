@@ -200,7 +200,6 @@ type PostgreSqlConfig struct {
 type ConfigStatus struct {
 }
 
-// +genclient
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 
