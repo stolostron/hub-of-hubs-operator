@@ -18,14 +18,29 @@ package hubofhubs
 
 import (
 	"context"
+	"embed"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 
 	hubofhubsv1alpha1 "github.com/stolostron/hub-of-hubs-operator/apis/hubofhubs/v1alpha1"
+	"github.com/stolostron/hub-of-hubs-operator/pkg/deployer"
+	"github.com/stolostron/hub-of-hubs-operator/pkg/renderer"
 )
+
+//go:embed manifests
+//go:embed manifests/agent
+//go:embed manifests/manager
+var fs embed.FS
+
+type managerConfig struct {
+	Registry      string
+	ImageTag      string
+	TransportType string
+}
 
 // ConfigReconciler reconciles a Config object
 type ConfigReconciler struct {
@@ -47,9 +62,58 @@ type ConfigReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
 func (r *ConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := ctrllog.FromContext(ctx)
 
-	// TODO(user): your logic here
+	// Fetch the hub-of-hubs config instance
+	hohConfig := &hubofhubsv1alpha1.Config{}
+	err := r.Get(ctx, req.NamespacedName, hohConfig)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			log.Info("Config resource not found. Ignoring since object must be deleted")
+			return ctrl.Result{}, nil
+		}
+		// Error reading the object - requeue the request.
+		log.Error(err, "Failed to get Config")
+		return ctrl.Result{}, err
+	}
+
+	transportType := "kafka"
+	if hohConfig.Spec.Components != nil && hohConfig.Spec.Components.Transport != nil {
+		if hohConfig.Spec.Components.Transport.Provider == hubofhubsv1alpha1.SyncServiceTransportProvider {
+			transportType = "sync-service"
+		}
+	}
+
+	// create a new HoHRenderer
+	hohRenderer := renderer.NewHoHRenderer(fs)
+	managerObjects, err := hohRenderer.Render("manifests/manager", func(component string) (interface{}, error) {
+		managerConfig := struct {
+			Registry      string
+			ImageTag      string
+			TransportType string
+		}{
+			Registry:      "quay.io/open-cluster-management-hub-of-hubs",
+			ImageTag:      "latest",
+			TransportType: transportType,
+		}
+
+		return managerConfig, err
+	})
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	hohDeployer := deployer.NewHoHDeployer(r.Client)
+	for _, obj := range managerObjects {
+		log.Info("Creating or updating object", "object", obj)
+		err := hohDeployer.Deploy(obj)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 
 	return ctrl.Result{}, nil
 }
