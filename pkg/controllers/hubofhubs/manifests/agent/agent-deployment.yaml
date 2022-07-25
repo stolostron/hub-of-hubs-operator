@@ -16,15 +16,15 @@ spec:
       serviceAccountName: hub-of-hubs-agent
       containers:
         - name: hub-of-hubs-agent
-          image: {{ .Registry }}/hub-of-hubs-agent:{{ .ImageTag }}
+          image: {{.Registry}}/hub-of-hubs-agent:{{.ImageTag}}
           args:
             - '--zap-devel=true'
             - --pod-namespace=$(POD_NAMESPACE)
-            - --leaf-hub-name={{ .LeafHubID }}
-            - --enforce-hoh-rbac={{ .EnforceHoHRbac }}
-            - --transport-type={{ .TransportType }}
-            - --kafka-bootstrap-server={{ .KafkaBootstrapServer }}
-            - --kafka-ssl-ca={{ .KafkaCA }}
+            - --leaf-hub-name={{.LeafHubID}}
+            - --enforce-hoh-rbac={{.EnforceHoHRbac}}
+            - --transport-type={{.TransportType}}
+            - --kafka-bootstrap-server={{.KafkaBootstrapServer}}
+            - --kafka-ssl-ca={{.KafkaCA}}
           imagePullPolicy: Always
           env:
             - name: POD_NAMESPACE

@@ -33,6 +33,7 @@ import (
 
 //go:embed manifests
 //go:embed manifests/agent
+//go:embed manifests/database
 //go:embed manifests/manager
 var fs embed.FS
 
@@ -87,8 +88,44 @@ func (r *ConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 	}
 
-	// create a new HoHRenderer
+	// create new HoHRenderer and HoHDeployer
 	hohRenderer := renderer.NewHoHRenderer(fs)
+	hohDeployer := deployer.NewHoHDeployer(r.Client)
+	dbObjects, err := hohRenderer.Render("manifests/database", func(component string) (interface{}, error) {
+		dbConfig := struct {
+			Registry string
+			ImageTag string
+		}{
+			Registry: "quay.io/open-cluster-management-hub-of-hubs",
+			ImageTag: "latest",
+		}
+
+		return dbConfig, err
+	})
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	var dbInitJobObj runtime.Object
+	for _, obj := range dbObjects {
+		if obj.GetObjectKind().GroupVersionKind().Kind == "Job" {
+			dbInitJobObj = obj
+			continue
+		}
+
+		log.Info("Creating or updating object", "object", obj)
+		err := hohDeployer.Deploy(obj)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	// create or updating the database initialization job
+	log.Info("Creating or updating object", "object", obj)
+	if err = hohDeployer.Deploy(dbInitJobObj); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	managerObjects, err := hohRenderer.Render("manifests/manager", func(component string) (interface{}, error) {
 		managerConfig := struct {
 			Registry      string
@@ -106,7 +143,6 @@ func (r *ConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	hohDeployer := deployer.NewHoHDeployer(r.Client)
 	for _, obj := range managerObjects {
 		log.Info("Creating or updating object", "object", obj)
 		err := hohDeployer.Deploy(obj)

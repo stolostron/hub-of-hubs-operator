@@ -18,13 +18,13 @@ spec:
       serviceAccountName: hub-of-hubs-manager
       containers:
         - name: hub-of-hubs-manager
-          image: {{ .Registry }}/hub-of-hubs-manager:{{ .ImageTag }}
+          image: {{.Registry}}/hub-of-hubs-manager:{{.ImageTag}}
           imagePullPolicy: Always
           args:
             - --zap-devel=true
             - --manager-namespace=$(POD_NAMESPACE)
             - --watch-namespace=$(WATCH_NAMESPACE)
-            - --transport-type={{ .TransportType }}
+            - --transport-type={{.TransportType}}
             - --process-database-url=$(PROCESS_DATABASE_URL)
             - --transport-bridge-database-url=$(TRANSPORT_BRIDGE_DATABASE_URL)
             - --authorization-cabundle-path=/hub-of-hubs-rbac-ca/service-ca.crt

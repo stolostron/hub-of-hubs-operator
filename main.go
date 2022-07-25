@@ -31,6 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	cdpov1beta1 "github.com/crunchydata/postgres-operator/pkg/apis/postgres-operator.crunchydata.com/v1beta1"
+
 	hubofhubsv1alpha1 "github.com/stolostron/hub-of-hubs-operator/apis/hubofhubs/v1alpha1"
 	hubofhubscontrollers "github.com/stolostron/hub-of-hubs-operator/pkg/controllers/hubofhubs"
 	//+kubebuilder:scaffold:imports
@@ -43,7 +45,7 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-
+	utilruntime.Must(cdpov1beta1.AddToScheme(scheme))
 	utilruntime.Must(hubofhubsv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
