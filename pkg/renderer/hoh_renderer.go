@@ -6,13 +6,10 @@ import (
 	"io/fs"
 	"strings"
 
-	cdpov1beta1 "github.com/crunchydata/postgres-operator/pkg/apis/postgres-operator.crunchydata.com/v1beta1"
 	"github.com/openshift/library-go/pkg/assets"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
-	k8sscheme "k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 )
 
 // HoHRenderer is an implementation of the Renderer interface for hub-of-hubs scenario
@@ -23,15 +20,9 @@ type HoHRenderer struct {
 
 // NewHoHRenderer create a HoHRenderer with given filesystem
 func NewHoHRenderer(manifestFS embed.FS) Renderer {
-	scheme := runtime.NewScheme()
-	_ = k8sscheme.AddToScheme(scheme)
-	_ = apiextensionsv1.AddToScheme(scheme)
-	_ = apiextensionsv1beta1.AddToScheme(scheme)
-	_ = cdpov1beta1.AddToScheme(scheme)
-
 	return &HoHRenderer{
 		manifestFS: manifestFS,
-		decoder:    serializer.NewCodecFactory(scheme).UniversalDeserializer(),
+		decoder:    yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme),
 	}
 }
 
