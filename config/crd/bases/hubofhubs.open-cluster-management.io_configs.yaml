@@ -63,6 +63,7 @@ spec:
                               for spec-transport-bridge
                             properties:
                               msgCompressType:
+                                default: gzip
                                 description: MsgCompressType specifies the type of
                                   message compress should do before sending the information
                                   to transport
@@ -71,9 +72,11 @@ spec:
                                 - no-op
                                 type: string
                               msgSizeLimit:
+                                default: 940
                                 format: int64
                                 type: integer
                               syncInterval:
+                                default: 5
                                 format: int64
                                 type: integer
                             type: object
@@ -81,6 +84,7 @@ spec:
                             description: StatusSyncConfig defines settings for status-sync
                             properties:
                               syncInterval:
+                                default: 5
                                 format: int64
                                 type: integer
                             type: object
@@ -89,9 +93,11 @@ spec:
                               for status-transport-bridge
                             properties:
                               committerInterval:
+                                default: 5
                                 format: int64
                                 type: integer
                               statisticsLogInterval:
+                                default: 5
                                 format: int64
                                 type: integer
                             type: object
@@ -107,6 +113,7 @@ spec:
                               enforceHoHRbac:
                                 type: boolean
                               kubeClientPoolSIze:
+                                default: 10
                                 format: int64
                                 type: integer
                             type: object
@@ -115,9 +122,11 @@ spec:
                               for leafhub-status-sync
                             properties:
                               deltaSentCountSwitchFactor:
+                                default: 100
                                 format: int64
                                 type: integer
                               msgCompressType:
+                                default: gzip
                                 description: MsgCompressType specifies the type of
                                   message compress should do before sending the information
                                   to transport
@@ -133,12 +142,15 @@ spec:
                                   snyc interval settings for leahub-status-sync
                                 properties:
                                   controlInfo:
+                                    default: 3600
                                     format: int64
                                     type: integer
                                   managedClusters:
+                                    default: 5
                                     format: int64
                                     type: integer
                                   policies:
+                                    default: 5
                                     format: int64
                                     type: integer
                                 type: object
@@ -170,12 +182,14 @@ spec:
                         description: KafkaConfig defines settings for Kafka transport
                         properties:
                           replicas:
+                            default: 3
                             format: int64
                             type: integer
                           version:
                             type: string
                         type: object
                       provider:
+                        default: kafka
                         description: TransportProvider specifies the provider type
                           of transport layer
                         enum:
@@ -187,6 +201,7 @@ spec:
                           transport
                         properties:
                           pollingInterval:
+                            default: 5
                             format: int64
                             type: integer
                           version:
@@ -198,6 +213,7 @@ spec:
                 description: GlobalConfig defines common settings
                 properties:
                   aggregationLevel:
+                    default: full
                     description: AggregationLevel specifies the level of aggregation
                       leaf hubs should do before sending the information
                     enum:
@@ -205,15 +221,18 @@ spec:
                     - minimal
                     type: string
                   enableLocalPolicies:
+                    default: true
                     type: boolean
                   heartbeatInterval:
                     description: HeartbeatIntervalConfig defines heartbeat intervals
                       for HoH and Leaf hub in seconds
                     properties:
                       hoh:
+                        default: 60
                         format: int64
                         type: integer
                       leafHub:
+                        default: 60
                         format: int64
                         type: integer
                     type: object
