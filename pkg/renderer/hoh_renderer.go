@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"strings"
 
+	cdpov1beta1 "github.com/crunchydata/postgres-operator/pkg/apis/postgres-operator.crunchydata.com/v1beta1"
 	"github.com/openshift/library-go/pkg/assets"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -26,6 +27,7 @@ func NewHoHRenderer(manifestFS embed.FS) Renderer {
 	_ = k8sscheme.AddToScheme(scheme)
 	_ = apiextensionsv1.AddToScheme(scheme)
 	_ = apiextensionsv1beta1.AddToScheme(scheme)
+	_ = cdpov1beta1.AddToScheme(scheme)
 
 	return &HoHRenderer{
 		manifestFS: manifestFS,

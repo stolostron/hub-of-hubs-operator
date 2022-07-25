@@ -16,15 +16,15 @@ spec:
       serviceAccountName: sync-service-ess
       containers:
         - name: ess
-          image: {{ .Registry }}/leaf-hub-sync-service-ess:stable
+          image: {{.Registry}}/leaf-hub-sync-service-ess:stable
           imagePullPolicy: Always
           env:
             - name: HTTPCSSHost
-              value: "{{ .CSSHost }}"
+              value: "{{.CSSHost}}"
             - name: HTTPCSSPort
               value: "80"
             - name: DESTINATION_ID
-              value: "{{ .LeafHubID }}"
+              value: "{{.LeafHubID}}"
             - name: LISTENING_TYPE
               value: unsecure
             - name: UNSECURE_LISTENING_PORT
