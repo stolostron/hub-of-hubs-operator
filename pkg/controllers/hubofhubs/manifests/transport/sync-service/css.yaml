@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sync-service
+  labels:
+    name: sync-service
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: sync-service-css
+  namespace: sync-service
+rules:
+- apiGroups:
+  - security.openshift.io
+  resourceNames:
+  - anyuid
+  resources:
+  - securitycontextconstraints
+  verbs:
+  - use
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sync-service-css
+  namespace: sync-service
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: sync-service-css
+  namespace: sync-service
+subjects:
+- kind: ServiceAccount
+  name: sync-service-css
+roleRef:
+  kind: Role
+  name: sync-service-css
+  apiGroup: rbac.authorization.k8s.io
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-service-css
+  namespace: sync-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: sync-service-css
+  template:
+    metadata:
+      labels:
+        name: sync-service-css
+    spec:
+      serviceAccountName: sync-service-css
+      containers:
+        - name: css
+          image: quay.io/open-cluster-management-hub-of-hubs/hub-of-hubs-sync-service-css:stable
+          imagePullPolicy: Always
+          env:
+            - name: LISTENING_TYPE
+              value: unsecure
+            - name: HTTP_POLLING_INTERVAL
+              value: "5"
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: sync-service-css
+  namespace: sync-service
+  labels:
+    name: sync-service-css
+spec:
+  ports:
+  - port: 9689
+    targetPort: 8080
+    name: http-port
+  selector:
+    name: sync-service-css
+---
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: sync-service-css
+  namespace: sync-service
+  labels:
+    name: sync-service-css
+spec:
+  port:
+    targetPort: http-port
+  to:
+    kind: Service
+    name: sync-service-css
+    weight: 100
+  wildcardPolicy: None

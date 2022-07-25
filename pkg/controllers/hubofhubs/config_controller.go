@@ -35,6 +35,8 @@ import (
 //go:embed manifests/agent
 //go:embed manifests/database
 //go:embed manifests/manager
+//go:embed manifests/transport/kafka
+//go:embed manifests/transport/sync-service
 var fs embed.FS
 
 type managerConfig struct {
@@ -91,6 +93,7 @@ func (r *ConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	// create new HoHRenderer and HoHDeployer
 	hohRenderer := renderer.NewHoHRenderer(fs)
 	hohDeployer := deployer.NewHoHDeployer(r.Client)
+
 	dbObjects, err := hohRenderer.Render("manifests/database", func(component string) (interface{}, error) {
 		dbConfig := struct {
 			Registry string
@@ -124,6 +127,29 @@ func (r *ConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	log.Info("Creating or updating object", "object", dbInitJobObj)
 	if err = hohDeployer.Deploy(dbInitJobObj); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	transportObjects, err := hohRenderer.Render("manifests/transport/"+transportType, func(component string) (interface{}, error) {
+		dbConfig := struct {
+			Registry string
+			ImageTag string
+		}{
+			Registry: "quay.io/open-cluster-management-hub-of-hubs",
+			ImageTag: "latest",
+		}
+
+		return dbConfig, err
+	})
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	for _, obj := range transportObjects {
+		log.Info("Creating or updating object", "object", obj)
+		err := hohDeployer.Deploy(obj)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	managerObjects, err := hohRenderer.Render("manifests/manager", func(component string) (interface{}, error) {
