@@ -1,15 +1,19 @@
 package renderer
 
 import (
+	"bufio"
+	"bytes"
 	"embed"
 	"fmt"
+	"io"
 	"io/fs"
 	"strings"
 
 	"github.com/openshift/library-go/pkg/assets"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	yamlserializer "k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 // HoHRenderer is an implementation of the Renderer interface for hub-of-hubs scenario
@@ -22,7 +26,7 @@ type HoHRenderer struct {
 func NewHoHRenderer(manifestFS embed.FS) Renderer {
 	return &HoHRenderer{
 		manifestFS: manifestFS,
-		decoder:    yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme),
+		decoder:    yamlserializer.NewDecodingSerializer(unstructured.UnstructuredJSONScheme),
 	}
 }
 
@@ -57,14 +61,26 @@ func (r *HoHRenderer) RenderWithFilter(component, filter string, getConfigValues
 		}
 
 		raw := assets.MustCreateAssetFromTemplate(template, templateContent, configValues).Data
-		object, _, err := r.decoder.Decode(raw, nil, nil)
-		if err != nil {
-			if runtime.IsMissingKind(err) {
-				continue
+		yamlReader := yaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(raw)))
+		for {
+			b, err := yamlReader.Read()
+			if err == io.EOF {
+				break
 			}
-			return objects, err
+			if err != nil {
+				return objects, err
+			}
+			if len(b) != 0 {
+				object, _, err := r.decoder.Decode(b, nil, nil)
+				if err != nil {
+					if runtime.IsMissingKind(err) {
+						continue
+					}
+					return objects, err
+				}
+				objects = append(objects, object)
+			}
 		}
-		objects = append(objects, object)
 	}
 
 	return objects, nil
