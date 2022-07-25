@@ -121,7 +121,7 @@ func (r *ConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	// create or updating the database initialization job
-	log.Info("Creating or updating object", "object", obj)
+	log.Info("Creating or updating object", "object", dbInitJobObj)
 	if err = hohDeployer.Deploy(dbInitJobObj); err != nil {
 		return ctrl.Result{}, err
 	}
