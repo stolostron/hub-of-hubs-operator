@@ -73,14 +73,18 @@ type ConfigSpec struct {
 
 // GlobalConfig defines common settings
 type GlobalConfig struct {
-	AggregationLevel    AggregationLevel         `json:"aggregationLevel,omitempty"` // full or minimal
-	HeartbeatInterval   *HeartbeatIntervalConfig `json:"heartbeatInterval,omitempty"`
-	EnableLocalPolicies bool                     `json:"enableLocalPolicies,omitempty"`
+	// +kubebuilder:default:=full
+	AggregationLevel  AggregationLevel         `json:"aggregationLevel,omitempty"` // full or minimal
+	HeartbeatInterval *HeartbeatIntervalConfig `json:"heartbeatInterval,omitempty"`
+	// +kubebuilder:default:=true
+	EnableLocalPolicies bool `json:"enableLocalPolicies,omitempty"`
 }
 
 // HeartbeatIntervalConfig defines heartbeat intervals for HoH and Leaf hub in seconds
 type HeartbeatIntervalConfig struct {
-	HoH     uint64 `default:"60" json:"hoh,omitempty"`
+	// +kubebuilder:default:=60
+	HoH uint64 `default:"60" json:"hoh,omitempty"`
+	// +kubebuilder:default:=60
 	LeafHub uint64 `default:"60" json:"leafHub,omitempty"`
 }
 
@@ -122,19 +126,25 @@ type SpecSyncConfig struct {
 
 // StatusSyncConfig defines settings for status-sync
 type StatusSyncConfig struct {
+	// +kubebuilder:default:=5
 	SyncInterval uint64 `default:"5" json:"syncInterval,omitempty"`
 }
 
 // SpecTransportBridgeConfig defines settings for spec-transport-bridge
 type SpecTransportBridgeConfig struct {
-	SyncInterval    uint64          `default:"5" json:"syncInterval,omitempty"`
+	// +kubebuilder:default:=5
+	SyncInterval uint64 `default:"5" json:"syncInterval,omitempty"`
+	// +kubebuilder:default:=gzip
 	MsgCompressType MsgCompressType `json:"msgCompressType,omitempty"` // gzip or no-op
-	MsgSizeLimit    uint64          `default:"940" json:"msgSizeLimit,omitempty"`
+	// +kubebuilder:default:=940
+	MsgSizeLimit uint64 `default:"940" json:"msgSizeLimit,omitempty"`
 }
 
 // StatusTransportBridgeConfig defines settings for status-transport-bridge
 type StatusTransportBridgeConfig struct {
-	CommitterInterval     uint64 `default:"5" json:"committerInterval,omitempty"`
+	// +kubebuilder:default:=5
+	CommitterInterval uint64 `default:"5" json:"committerInterval,omitempty"`
+	// +kubebuilder:default:=5
 	StatisticsLogInterval uint64 `default:"5" json:"statisticsLogInterval,omitempty"`
 }
 
@@ -146,27 +156,34 @@ type LeafHubConfig struct {
 
 // LeafHubSpecSyncConfig defines settings for leafhub-spec-sync
 type LeafHubSpecSyncConfig struct {
+	// +kubebuilder:default:=10
 	KubeClientPoolSIze uint64 `default:"10" json:"kubeClientPoolSIze,omitempty"`
 	EnforceHoHRbac     bool   `json:"enforceHoHRbac,omitempty"`
 }
 
 // LeafHubStatusSyncConfig defines settings for leafhub-status-sync
 type LeafHubStatusSyncConfig struct {
-	SyncInterval               *LeafHubStatusSyncIntervalSettings `json:"syncIntervalConfig,omitempty"`
-	DeltaSentCountSwitchFactor uint64                             `default:"100" json:"deltaSentCountSwitchFactor,omitempty"`
-	MsgCompressType            MsgCompressType                    `json:"msgCompressType,omitempty"` // gzip or no-op
-	MsgSizeLimit               uint64                             `default:"940" json:"msgSizeLimit,omitempty"`
+	SyncInterval *LeafHubStatusSyncIntervalSettings `json:"syncIntervalConfig,omitempty"`
+	// +kubebuilder:default:=100
+	DeltaSentCountSwitchFactor uint64 `default:"100" json:"deltaSentCountSwitchFactor,omitempty"`
+	// +kubebuilder:default:=gzip
+	MsgCompressType MsgCompressType `json:"msgCompressType,omitempty"` // gzip or no-op
+	MsgSizeLimit    uint64          `default:"940" json:"msgSizeLimit,omitempty"`
 }
 
 // LeafHubStatusSyncIntervalSettings defines snyc interval settings for leahub-status-sync
 type LeafHubStatusSyncIntervalSettings struct {
+	// +kubebuilder:default:=5
 	ManagedClusterSyncInterval uint64 `default:"5" json:"managedClusters,omitempty"`
-	PolicySyncInterval         uint64 `default:"5" json:"policies,omitempty"`
-	ControlInfoSyncInterval    uint64 `default:"3600" json:"controlInfo,omitempty"`
+	// +kubebuilder:default:=5
+	PolicySyncInterval uint64 `default:"5" json:"policies,omitempty"`
+	// +kubebuilder:default:=3600
+	ControlInfoSyncInterval uint64 `default:"3600" json:"controlInfo,omitempty"`
 }
 
 // TransportConfig defines settings for transport layer
 type TransportConfig struct {
+	// +kubebuilder:default:=kafka
 	Provider    TransportProvider  `json:"provider,omitempty"` // kafka or sync-service
 	Kafka       *KafkaConfig       `json:"kafka,omitempty"`
 	SyncService *SyncServiceConfig `json:"syncService,omitempty"`
@@ -174,13 +191,15 @@ type TransportConfig struct {
 
 // KafkaConfig defines settings for Kafka transport
 type KafkaConfig struct {
-	Version  string `json:"version,omitempty"`
+	Version string `json:"version,omitempty"`
+	// +kubebuilder:default:=3
 	Replicas uint64 `default:"3" json:"replicas,omitempty"`
 }
 
 // SyncServiceConfig defines settings for Sync-service transport
 type SyncServiceConfig struct {
-	Version         string `json:"version,omitempty"`
+	Version string `json:"version,omitempty"`
+	// +kubebuilder:default:=5
 	PollingInterval uint64 `default:"5" json:"pollingInterval,omitempty"`
 }
 
